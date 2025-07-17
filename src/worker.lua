@@ -1,6 +1,6 @@
-local fishnet = require("fishnet")
-local PersistentTask = require("persistent_task")
-local PersistentQueue = require("persistent_queue")
+local fishnet = require("lib.fishnet")
+local PersistentTask = require("lib.persistent_task")
+local PersistentQueue = require("lib.persistent_queue")
 
 ---@diagnostic disable-next-line: undefined-global
 local global = global

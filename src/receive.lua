@@ -1,4 +1,4 @@
-local fishnet = require("fishnet")
+local fishnet = require("lib.fishnet")
 
 ---@diagnostic disable-next-line: undefined-global
 local global = global

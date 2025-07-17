@@ -1,4 +1,4 @@
-local PersistentQueue = require("persistent_queue")
+local PersistentQueue = require("lib.persistent_queue")
 
 ---@diagnostic disable-next-line: lowercase-global
 global = {
