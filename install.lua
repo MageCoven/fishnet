@@ -32,6 +32,8 @@ for _, file in ipairs(files) do
         print("Downloading " .. file .. "...")
         downloadFile(file, file)
     else
-        print(file .. " already exists, skipping download.")
+        fs.delete(file)
+        print("Downloading " .. file .. "...")
+        downloadFile(file, file)
     end
 end
