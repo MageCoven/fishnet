@@ -10,10 +10,14 @@ local files = {
 }
 
 local function downloadFile(path, dest)
+    if fs.exists(dest) then
+        error("File already exists: " .. dest, 2)
+    end
+
     local url = URL .. path
     local response = http.get(url)
     if not response then
-        error("Failed to download " .. url)
+        error("Failed to download " .. url, 0)
     end
     local content = response.readAll()
     response.close()

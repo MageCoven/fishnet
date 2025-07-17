@@ -1,10 +1,11 @@
 local PersistentQueue = {}
+PersistentQueue.__index = PersistentQueue
 
 --- PersistentQueue class for managing a queue stored in a file.
 --- @class PersistentQueue
 --- @field filename string The file where the queue is stored.
 --- @field queue table The in-memory representation of the queue.
---- @field new fun(self: PersistentQueue, filename: string): PersistentQueue
+--- @field new fun(filename: string): PersistentQueue
 --- @field push fun(self: PersistentQueue, item: any): nil
 --- @field pop fun(self: PersistentQueue): any
 --- @field save fun(self: PersistentQueue): nil
@@ -13,10 +14,9 @@ local PersistentQueue = {}
 --- Create a new PersistentQueue instance.
 --- @param filename string The file where the queue will be stored.
 --- @return PersistentQueue
-function PersistentQueue:new(filename)
+function PersistentQueue.new(filename)
     local obj = { filename = filename, queue = {} }
-    setmetatable(obj, self)
-    self.__index = self
+    setmetatable(obj, PersistentQueue)
     return obj
 end
 

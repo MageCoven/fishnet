@@ -8,7 +8,7 @@ local global = global
 local message_queue = global.message_queue
 
 
-local task_queue = PersistentQueue:new("task_queue")
+local task_queue = PersistentQueue.new("task_queue")
 local current_task = PersistentTask.load("current_task")
 
 while true do
@@ -33,7 +33,7 @@ while true do
     else
         local next_task = task_queue:pop()
         if next_task then
-            current_task = PersistentTask:new(
+            current_task = PersistentTask.new(
                 "current_task",
                 next_task.program,
                 next_task.args

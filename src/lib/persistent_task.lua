@@ -1,4 +1,5 @@
 local PersistentTask = {}
+PersistentTask.__index = PersistentTask
 
 ---@class PersistentTask
 ---@field file_path string
@@ -8,7 +9,7 @@ local PersistentTask = {}
 ---@field methods table
 ---@field is_initialized boolean
 ---@field is_complete boolean
----@field new fun(self: PersistentTask, task: string, args: table): nil
+---@field new fun(task: string, args: table): nil
 ---@field init fun(self: PersistentTask, x: number, y: number, z: number): nil
 ---@field update fun(self: PersistentTask, x: number, y: number, z: number): nil
 ---@field save fun(self: PersistentTask): nil
@@ -21,16 +22,18 @@ local PersistentTask = {}
 ---@param task string The task to run.
 ---@param args table The arguments to pass to the task.
 ---@return PersistentTask
-function PersistentTask:new(file_path, task, args)
-    local self = setmetatable({}, { __index = PersistentTask })
-    self.file_path = file_path
-    self.task = task
-    self.args = args
-    self.data = {}
-    self.methods = {}
-    self.is_initialized = false
-    self.is_complete = false
+function PersistentTask.new(file_path, task, args)
+    local o = {
+        file_path = file_path,
+        task = task,
+        args = args or {},
+        data = {},
+        methods = {},
+        is_initialized = false,
+        is_complete = false
+    }
 
+    local self = setmetatable(o, PersistentTask)
     self:save()
 
     return self
@@ -100,7 +103,7 @@ function PersistentTask.load(file_path)
         error("Failed to unserialize content from file: " .. file_path, 2)
     end
 
-    local task = PersistentTask:new(data.file_path, data.task, data.args)
+    local task = PersistentTask.new(data.file_path, data.task, data.args)
     task.data = data.data
     task.is_initialized = data.is_initialized
     task.is_complete = data.is_complete
