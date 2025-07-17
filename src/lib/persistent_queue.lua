@@ -4,7 +4,7 @@ local PersistentQueue = {}
 --- @class PersistentQueue
 --- @field filename string The file where the queue is stored.
 --- @field queue table The in-memory representation of the queue.
---- @field new fun(filename: string): PersistentQueue
+--- @field new fun(self: PersistentQueue, filename: string): PersistentQueue
 --- @field push fun(self: PersistentQueue, item: any): nil
 --- @field pop fun(self: PersistentQueue): any
 --- @field save fun(self: PersistentQueue): nil
@@ -63,3 +63,5 @@ function PersistentQueue:load()
         self.queue = {}
     end
 end
+
+return PersistentQueue
