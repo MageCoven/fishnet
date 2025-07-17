@@ -1,0 +1,37 @@
+local URL = "https://raw.githubusercontent.com/MageCoven/fishnet/refs/heads/main/src/"
+
+local files = {
+    "lib/fishnet.lua",
+    "lib/persistent_queue.lua",
+    "lib/persistent_task.lua",
+    "receive.lua",
+    "startup.lua",
+    "worker.lua"
+}
+
+local function downloadFile(path, dest)
+    local url = URL .. path
+    local response = http.get(url)
+    if not response then
+        error("Failed to download " .. url)
+    end
+    local content = response.readAll()
+    response.close()
+
+    local file = fs.open(dest, "w")
+    if not file then
+        error("Could not open file for writing: " .. dest)
+    end
+
+    file.write(content)
+    file.close()
+end
+
+for _, file in ipairs(files) do
+    if not fs.exists(file) then
+        print("Downloading " .. file .. "...")
+        downloadFile(file, file)
+    else
+        print(file .. " already exists, skipping download.")
+    end
+end
