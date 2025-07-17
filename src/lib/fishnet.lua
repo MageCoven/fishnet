@@ -4,12 +4,19 @@ settings.define("fishnet.download_folder", {
     description = "Folder where files received via Fishnet will be saved."
 })
 
-local modem = peripheral.find("modem")
-if not modem then
-    error("No modem found.")
+local peripheral_names = peripheral.getNames()
+local modem_name = nil
+for _, name in ipairs(peripheral_names) do
+    if peripheral.getType(name) == "modem" then
+        modem_name = name
+        break
+    end
+end
+if not modem_name then
+    error("No modem found.", 0)
 end
 
-rednet.open(modem)
+rednet.open(modem_name)
 
 local fishnet = {
     PROTOCOL = "fishnet",
