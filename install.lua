@@ -4,7 +4,6 @@ local files = {
     "lib/fishnet.lua",
     "lib/persistent_queue.lua",
     "lib/persistent_task.lua",
-    "receive.lua",
     "startup.lua",
     "worker.lua"
 }
