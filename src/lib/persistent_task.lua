@@ -1,3 +1,8 @@
+-- persistent_task.lua
+-- version: 1.0.0
+-- author: MageCoven
+-- license: MIT
+
 local PersistentTask = {}
 PersistentTask.__index = PersistentTask
 

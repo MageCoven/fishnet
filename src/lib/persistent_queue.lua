@@ -1,3 +1,8 @@
+-- persistent_queue.lua
+-- version: 1.0.0
+-- author: MageCoven
+-- license: MIT
+
 local PersistentQueue = {}
 PersistentQueue.__index = PersistentQueue
 

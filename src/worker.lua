@@ -1,3 +1,8 @@
+-- worker.lua
+-- version: 1.0.0
+-- author: MageCoven
+-- license: MIT
+
 local fishnet = require("lib.fishnet")
 local PersistentTask = require("lib.persistent_task")
 local PersistentQueue = require("lib.persistent_queue")

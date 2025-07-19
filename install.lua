@@ -1,3 +1,8 @@
+-- install.lua
+-- version: 1.0.0
+-- author: MageCoven
+-- license: MIT
+
 local URL = "https://raw.githubusercontent.com/MageCoven/fishnet/refs/heads/main/src/"
 
 local files = {
@@ -28,15 +33,18 @@ local function downloadFile(path, dest)
 
     file.write(content)
     file.close()
+
+    local version = content:match("version:%s*(%d+%.%d+%.%d+)")
+    return version or "unknown"
 end
 
 for _, file in ipairs(files) do
     if not fs.exists(file) then
-        print("Downloading " .. file .. "...")
-        downloadFile(file, file)
+        local version = downloadFile(file, file)
+        print("Downloaded " .. file .. " (version: " .. version .. ")")
     else
         fs.delete(file)
-        print("Downloading " .. file .. "...")
-        downloadFile(file, file)
+        local version = downloadFile(file, file)
+        print("Replaced " .. file .. " (version: " .. version .. ")")
     end
 end

@@ -1,3 +1,8 @@
+-- fishnet.lua
+-- version: 1.0.0
+-- author: MageCoven
+-- license: MIT
+
 settings.define("fishnet.download_folder", {
     type = "string",
     default = "downloads",
