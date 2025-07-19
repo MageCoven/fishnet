@@ -20,8 +20,8 @@ rednet.open(modem_name)
 
 local fishnet = {
     PROTOCOL = "fishnet",
-    PROTOCOL_STATUS = "fishnet::status",
-    PROTOCOL_FILE = "fishnet::file"
+    PROTOCOL_STATUS = "fishnet.:status",
+    PROTOCOL_FILE = "fishnet.:file"
 }
 
 --- Send a message to a specific receiver.
@@ -105,40 +105,40 @@ end
 --- Receive a file from any sender.
 ---@param timeout number|nil
 ---@return string|nil, string
-function fishnet:receive_file(timeout)
+function fishnet.receive_file(timeout)
     local id, message = fishnet.receive(fishnet.PROTOCOL_FILE, timeout)
     return handle_receive_file(id, message, fishnet.PROTOCOL_FILE)
 end
 
 --- Host a service with a specific hostname.
 ---@param hostname string
-function fishnet:host(hostname)
+function fishnet.host(hostname)
     rednet.host(fishnet.PROTOCOL, hostname)
 end
 
 --- Unhost a service with a specific hostname.
 ---@param hostname string
-function fishnet:unhost(hostname)
+function fishnet.unhost(hostname)
     rednet.unhost(fishnet.PROTOCOL, hostname)
 end
 
 --- Find a service with a specific hostname.
 ---@param hostname string
 ---@return integer|nil
-function fishnet:lookup(hostname)
+function fishnet.lookup(hostname)
     local ids = {rednet.lookup(fishnet.PROTOCOL, hostname)}
     return ids[1]
 end
 
 --- Close the modem connection.
-function fishnet:close()
+function fishnet.close()
     rednet.close()
 end
 
 --- Receive any message with a specific protocol.
 ---@param timeout number|nil
 ---@return table, string|nil
-function fishnet:receive_any(timeout)
+function fishnet.receive_any(timeout)
     local id, message, protocol = rednet.receive(nil, timeout)
     if not message then
         return {}, "No message received"
@@ -172,3 +172,5 @@ function fishnet:receive_any(timeout)
         return {}, "Unknown protocol: " .. protocol
     end
 end
+
+return fishnet
