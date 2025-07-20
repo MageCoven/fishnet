@@ -30,15 +30,14 @@ local function ui_handler()
         term.setCursorPos(1, 1)
         
         if task then
-            term.write("Current Task: " .. task.name .. "\n")
-            term.write("Status: " .. (task.status or "Running") .. "\n")
+            print("Current Task: " .. task.name)
+            print("Status: " .. (task.status or "Running"))
         else
-            term.write("No current task.\n")
+            print("No current task.")
         end
 
-        term.write("Pending Messages: " .. receive_queue:size() .. "\n")
-        term.write("Press 'q' to quit.\n")
-
+        print("Pending Messages: " .. receive_queue:size())
+        print("Press 'q' to quit.")
 
         term.setCursorPos(width - 1, height)
         term.write(spinner)
