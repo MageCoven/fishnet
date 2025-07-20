@@ -43,6 +43,7 @@ if #args > 0 and args[1] == "update" then
     fs.delete("install.lua")
     local version = downloadFile(URL_BASE .. "install.lua", "install.lua")
     print("Updated installer (version: " .. version .. ")")
+    return
 end
 
 for _, file in ipairs(files) do
