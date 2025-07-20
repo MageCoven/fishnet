@@ -39,10 +39,16 @@ local function ui_handler()
         print("Pending Messages: " .. receive_queue:size())
         print("Press 'q' to quit.")
 
-        term.setCursorPos(width - 1, height)
+        term.setCursorPos(width, height)
         term.write(spinner)
         spinner = (spinner + 1) % 4
 
+        sleep(0.1)
+    end
+end
+
+local function input_handler()
+    while true do
         local event, key = os.pullEvent("key")
         if key == keys.q then
             term.clear()
@@ -53,35 +59,8 @@ local function ui_handler()
     end
 end
 
-local function task_handler()
-    while true do
-        while task == nil do
-            sleep(0.1)
-        end
-
-        error("Implement task handling logic here.")
-    end
-end
-
-local function message_handler()
-    while true do
-        --- @type Message
-        local msg = receive_queue:pop()
-
-        if fishnet.does_protocol_match(msg.protocol, PROTOCOL_TASK .. "*") then
-            if task == nil then
-                task = {
-                    program = msg.content.program,
-                    args = msg.content.args or {},
-                }
-            end
-        end
-    end
-end
-
 parallel.waitForAny(
     fishnet.new_coroutine(send_queue, receive_queue),
-    ui_handler,
-    task_handler,
-    message_handler
+    input_handler,
+    ui_handler
 )
