@@ -15,7 +15,7 @@ local receive_queue = Queue.new()
 local task = nil
 
 local function ui_handler()
-    local spinner = "/"
+    local spinner = 0
     local spinner_next = {
         ["/"] = "-",
         ["-"] = "\\",
@@ -41,13 +41,13 @@ local function ui_handler()
 
         term.setCursorPos(width - 1, height)
         term.write(spinner)
-        spinner = spinner_next[spinner]
+        spinner = (spinner + 1) % 4
 
         local event, key = os.pullEvent("key")
         if key == keys.q then
             term.clear()
             term.setCursorPos(1, 1)
-            term.write("Worker stopped.")
+            print("Worker stopped.")
             break
         end
     end

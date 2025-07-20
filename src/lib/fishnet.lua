@@ -9,8 +9,8 @@ local fishnet = {}
 
 fishnet.VERSION = "0.1.0"
 fishnet.PROTOCOL = "fishnet"
-fishnet.PROTOCOL_FTP = "fishnet::ftp"
-fishnet.PROTOCOL_SIMPLE = "fishnet::simple"
+fishnet.PROTOCOL_FTP = "fishnet_ftp"
+fishnet.PROTOCOL_SIMPLE = "fishnet_simple"
 
 settings.define("fishnet.download_folder", {
     type = "string",
@@ -43,34 +43,29 @@ function fishnet.message(address, content, protocol)
     }
 end
 
---- Check if the given protocols match.
----@param a string The protocol to check.
----@param b string The protocol to check.
----@return boolean True if the protocol matches, false otherwise.
-function fishnet.is_same_protocol(a, b)
-    if a == b then
+--- Check if the given protocol matches the specified pattern.
+---@param protocol string The protocol to check.
+---@param pattern string The pattern to match against.
+---@return boolean True if the protocol matches the pattern, false otherwise.
+function fishnet.does_protocol_match(protocol, pattern)
+    local effective_pattern = pattern:gsub("^%*", ""):gsub("%*$", "")
+
+    if #effective_pattern == 0 then
         return true
     end
-    
-    local a_parts = {}
-    for part in a:gmatch("[^:]+") do
-        table.insert(a_parts, part)
-    end
 
-    local b_parts = {}
-    for part in b:gmatch("[^:]+") do
-        table.insert(b_parts, part)
-    end
+    local starts_with_wildcard = pattern:sub(1, 1) == "*"
+    local ends_with_wildcard = pattern:sub(-1, -1) == "*"
 
-    for i = 1, math.min(#a_parts, #b_parts) do
-        if (a_parts[i] ~= "*" and
-            b_parts[i] ~= "*" and
-            a_parts[i] ~= b_parts[i]) then
-            return false
-        end
+    if starts_with_wildcard and ends_with_wildcard then
+        return protocol:find(effective_pattern, 1, true) ~= nil
+    elseif starts_with_wildcard then
+        return protocol:sub(-#effective_pattern) == effective_pattern
+    elseif ends_with_wildcard then
+        return protocol:sub(1, #effective_pattern) == effective_pattern
+    else
+        return protocol == effective_pattern
     end
-
-    return true
 end
 
 --- Send a message over the fishnet protocol.
@@ -81,18 +76,18 @@ function fishnet.send(message)
 end
 
 --- Receive a message over the fishnet protocol.
----@overload fun(protocol: string): Message
+---@overload fun(pattern: string): Message
 ---@overload fun(protocol: string, timeout: number): Message|nil
-function fishnet.receive(protocol, timeout)
-    local id, content, p
+function fishnet.receive(pattern, timeout)
+    local id, content, protocol
     while true do
-        id, content, p = rednet.receive(nil, timeout)
+        id, content, protocol = rednet.receive(nil, timeout)
         if not id then
             return nil
         end
 
-        if fishnet.is_same_protocol(protocol, p) then
-            return fishnet.message(id, content, p)
+        if fishnet.does_protocol_match(protocol, pattern) then
+            return fishnet.message(id, content, protocol)
         end
     end
 end
@@ -141,7 +136,7 @@ function fishnet.new_coroutine(send_queue, receive_queue)
                 while true do
                     local msg = fishnet.receive("*")
 
-                    if fishnet.is_same_protocol(msg.protocol, fishnet.PROTOCOL_FTP) then
+                    if fishnet.does_protocol_match(msg.protocol, fishnet.PROTOCOL_FTP .. "*") then
                         if settings.get("fishnet.allow_ftp") then
                             local file_path = settings.get("fishnet.download_folder") .. "/" .. msg.content.file_name
                             local file = fs.open(file_path, "w")
