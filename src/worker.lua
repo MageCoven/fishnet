@@ -1,68 +1,88 @@
 -- worker.lua
--- version: 1.0.0
+-- version: 0.1.0
 -- author: MageCoven
 -- license: MIT
 
 local fishnet = require("lib.fishnet")
-local PersistentTask = require("lib.persistent_task")
-local PersistentQueue = require("lib.persistent_queue")
+local Queue = require("lib.queue")
 
----@type PersistentQueue
-local message_queue = PersistentQueue.new("message_queue")
-message_queue:load()
+local PROTOCOL = "worker"
+local PROTOCOL_STATUS = "worker::status"
+local PROTOCOL_TASK = "worker::task"
 
-local task_queue = PersistentQueue.new("task_queue")
-local current_task = PersistentTask.load("current_task")
+local send_queue = Queue.new()
+local receive_queue = Queue.new()
+local task = nil
 
-local function handleReceivingMessages()
+local function ui_handler()
+    local spinner = "/"
+    local spinner_next = {
+        ["/"] = "-",
+        ["-"] = "\\",
+        ["\\"] = "|",
+        ["|"] = "/"
+    }
+
     while true do
-        local msg, err = fishnet.receive_any()
-        if err then
-            error("Error receiving message: " .. err, 0)
+        local width, height = term.getSize()
+        
+        term.clear()
+        term.setCursorPos(1, 1)
+        
+        if task then
+            term.write("Current Task: " .. task.name .. "\n")
+            term.write("Status: " .. (task.status or "Running") .. "\n")
+        else
+            term.write("No current task.\n")
         end
 
-        message_queue:push(msg)
+        term.write("Pending Messages: " .. receive_queue:size() .. "\n")
+        term.write("Press 'q' to quit.\n")
+
+
+        term.setCursorPos(width - 1, height)
+        term.write(spinner)
+        spinner = spinner_next[spinner]
+
+        local event, key = os.pullEvent("key")
+        if key == keys.q then
+            term.clear()
+            term.setCursorPos(1, 1)
+            term.write("Worker stopped.")
+            break
+        end
     end
 end
 
-local function handleTasks()
+local function task_handler()
     while true do
-        local msg = message_queue:pop()
-        if msg then
-            if msg.type == "add_task" then
-                local task = msg.data
-                task_queue:push(task)
-            end
+        while task == nil do
+            sleep(0.1)
         end
 
-        local x, y, z = gps.locate()
-        if not x or not y or not z then
-            error("GPS location not available", 0)
-        end
+        error("Implement task handling logic here.")
+    end
+end
 
-        if current_task then
-            current_task:update(x, y, z)
-            if current_task.is_complete then
-                current_task = nil
-            end
-        else
-            local next_task = task_queue:pop()
-            if next_task then
-                current_task = PersistentTask.new(
-                    "current_task",
-                    next_task.program,
-                    next_task.args
-                )
-                current_task:init(x, y, z)
-                current_task:update(x, y, z)
+local function message_handler()
+    while true do
+        --- @type Message
+        local msg = receive_queue:pop()
+
+        if fishnet.is_same_protocol(msg.protocol, PROTOCOL_TASK) then
+            if task == nil then
+                task = {
+                    program = msg.content.program,
+                    args = msg.content.args or {},
+                }
             end
         end
-        
-        sleep(0) -- Yield to allow other processes to run
     end
 end
 
 parallel.waitForAny(
-    handleReceivingMessages,
-    handleTasks
+    fishnet.new_coroutine(send_queue, receive_queue),
+    ui_handler,
+    task_handler,
+    message_handler
 )
