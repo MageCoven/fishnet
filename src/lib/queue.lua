@@ -1,9 +1,7 @@
 -- lib/queue.lua
--- version: 0.1.0
+-- version: 0.1.1
 -- author: MageCoven
 -- license: MIT
-
-local DataReference = require("lib.data_reference")
 
 local Queue = {}
 Queue.__index = Queue
