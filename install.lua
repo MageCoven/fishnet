@@ -19,7 +19,13 @@ local function downloadFile(url, dest)
         error("File already exists: " .. dest, 2)
     end
 
-    local response = http.get(url)
+    local response = http.get(
+        url,
+        {
+            ["Cache-Control"] = "no-cache, no-store, must-revalidate",
+            ["Pragma"] = "no-cache",
+            ["Expires"] = "0"
+        })
     if not response then
         error("Failed to download " .. url, 0)
     end
