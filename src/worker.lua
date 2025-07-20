@@ -68,7 +68,7 @@ local function message_handler()
         --- @type Message
         local msg = receive_queue:pop()
 
-        if fishnet.is_same_protocol(msg.protocol, PROTOCOL_TASK) then
+        if fishnet.does_protocol_match(msg.protocol, PROTOCOL_TASK .. "*") then
             if task == nil then
                 task = {
                     program = msg.content.program,
