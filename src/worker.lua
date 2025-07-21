@@ -22,7 +22,7 @@ local task = nil
 local direction = "north"
 
 local function determine_direction()
-    if turtle.getFuelLevel() <= 0 then
+    if turtle.getFuelLevel() < 2 then
         error("Turtle needs fuel to determine direction.", 2)
     end
 
@@ -42,6 +42,8 @@ local function determine_direction()
     if not end_x then
         error("GPS location not available after moving.", 2)
     end
+    
+    turtle.back()  -- Move back to the original position
 
     if end_x > start_x then
         direction = "east"
