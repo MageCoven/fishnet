@@ -15,6 +15,12 @@ settings.define("worker.task_folder", {
     description = "The folder where task files are stored."
 })
 
+settings.define("worker.task_data_file", {
+    type = "string",
+    default = ".worker/task_data.lt",
+    description = "The file where task data is stored."
+})
+
 local send_queue = Queue.new()
 local receive_queue = Queue.new()
 local task = nil
@@ -56,6 +62,40 @@ local function determine_direction()
     else
         error("Could not determine direction based on GPS coordinates.", 2)
     end
+end
+
+local function load_task_if_any()
+    if not fs.exists(settings.get("worker.task_data_file")) then
+        task = nil
+    end
+
+    local file = fs.open(settings.get("worker.task_data_file"), "r")
+    if not file then
+        error("Could not open task data file for reading: " .. settings.get("worker.task_data_file"), 2)
+    end
+
+    local content = file.readAll()
+    file.close()
+
+    local data = textutils.unserialize(content)
+    if not data or type(data) ~= "table" then
+        error("Invalid task data file format.", 2)
+    end
+
+    local methods = require(settings.get("worker.task_folder") .. "/" .. data.name)
+    if type(methods) ~= "table" or not methods.init or not methods.update then
+        error("Task file must return a table with 'init' and 'update' methods.", 2)
+    end
+
+    task = {
+        file_path = settings.get("worker.task_folder") .. "/" .. data.name .. ".lua",
+        name = data.name,
+        args = data.args,
+        status = data.status or "setup",
+        data = data.data,
+        init = methods.init,
+        update = methods.update
+    }
 end
 
 --- Deep copies a table
@@ -189,6 +229,19 @@ local function task_handler()
         local position = { x = x, y = y, z = z }
         local args_copy = deep_copy_table(task.args)
 
+        local task_data = {
+            name = task.name,
+            args = task.args,
+            status = task.status,
+            data = task.data,
+        }
+        local file = fs.open(settings.get("worker.task_data_file"), "w")
+        if not file then
+            error("Could not open task data file for writing: " .. settings.get("worker.task_data_file"), 2)
+        end
+        file.write(textutils.serialize(task_data))
+        file.close()
+
         if task.status == "setup" then
             task.status = "init"
         elseif task.status == "init" then
@@ -198,6 +251,9 @@ local function task_handler()
         elseif task.status == "done" then
             -- Task completed, reset task
             task = nil
+            if fs.exists(settings.get("worker.task_data_file")) then
+                fs.delete(settings.get("worker.task_data_file"))
+            end
         else
             error("Unknown task status: " .. tostring(task.status), 2)
         end
