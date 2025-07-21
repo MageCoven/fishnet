@@ -42,7 +42,7 @@ local function determine_direction()
     if not end_x then
         error("GPS location not available after moving.", 2)
     end
-    
+
     turtle.back()  -- Move back to the original position
 
     if end_x > start_x then
@@ -127,7 +127,8 @@ local function message_handler()
         if fishnet.does_protocol_match(message.protocol, PROTOCOL_TASK) then
             assert(task == nil, "Not implemented: Task already running.")
 
-            local task_file = message.content.task_name .. ".lua"
+            local task_name = message.content.task_name
+            local task_file = task_name .. ".lua"
             local args = message.content.args
 
             if type(task_file) ~= "string" then
@@ -144,7 +145,8 @@ local function message_handler()
                 error("Not implemented: Task file does not exist: " .. task_path, 2)
             end
 
-            local methods = require(task_path)
+            local require_path = settings.get("worker.task_folder") .. "/" .. task_name
+            local methods = require(require_path)
             if type(methods) ~= "table" or not methods.init or not methods.update then
                 error("Task file must return a table with 'init' and 'update' methods.", 2)
             end
