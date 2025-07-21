@@ -24,6 +24,9 @@ settings.define("fishnet.allow_ftp", {
     description = "Allow FTP protocol for file transfers."
 })
 
+peripheral.find("modem", rednet.open)
+assert(rednet.isOpen(), "Rednet could not open. Please ensure a modem is connected.")
+
 --- The message object structure.
 --- @class Message
 --- @field address number The address of the sender/receiver.
