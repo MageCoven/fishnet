@@ -1,5 +1,5 @@
 -- lib/fishnet.lua
--- version: 0.1.0
+-- version: 0.1.1
 -- author: MageCoven
 -- license: MIT
 
@@ -20,7 +20,7 @@ settings.define("fishnet.download_folder", {
 
 settings.define("fishnet.allow_ftp", {
     type = "boolean",
-    default = true,
+    default = false,
     description = "Allow FTP protocol for file transfers."
 })
 

@@ -1,5 +1,5 @@
 -- worker.lua
--- version: 0.1.1
+-- version: 0.1.2
 -- author: MageCoven
 -- license: MIT
 
@@ -22,6 +22,10 @@ local task = nil
 local direction = "north"
 
 local function determine_direction()
+    if turtle.getFuelLevel() <= 0 then
+        error("Turtle needs fuel to determine direction.", 2)
+    end
+
     local start_x, start_y, start_z = gps.locate()
     if not start_x then
         error("GPS location not available to determine direction.", 2)
